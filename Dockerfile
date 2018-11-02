@@ -1,0 +1,20 @@
+FROM alpine
+
+ARG HELM_VERSION
+ARG KUBECTL_VERSION
+
+RUN ALPINE_VERSION=$(cat /etc/alpine-release | cut -d '.' -f 1,2) && \
+  echo http://mirror.clarkson.edu/alpine/v$ALPINE_VERSION/main >> /etc/apk/repositories && \
+  echo http://mirror1.hs-esslingen.de/pub/Mirrors/alpine/v$ALPINE_VERSION/main >> /etc/apk/repositories && \
+  apk add -U wget ca-certificates openssl git && \
+  wget -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
+  wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.28-r0/glibc-2.28-r0.apk && \
+  apk add glibc-2.28-r0.apk && \
+  rm glibc-2.28-r0.apk && \
+  wget -O - https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar -zxvC /tmp && \
+  mv /tmp/linux-amd64/helm /usr/bin/ && \
+  wget https://storage.googleapis.com/kubernetes-release/release/v1.11.0/bin/linux/amd64/kubectl && \
+  chmod +x kubectl && \
+  mv kubectl /usr/bin/ && \
+  helm version --client && \
+  kubectl version --client
